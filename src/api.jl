@@ -35,7 +35,7 @@ abstract type SearchType end
     searchstructure(T, data, metric; kwargs...) → st
 Create a search structure `st` of type `T` (e.g. `KDTree, BKTree` etc.) based on the
 given `data` and `metric`. The data types and supported metric types are package-specific,
-but typically all subtypes of `<:Metric` from Distances.jl are supported.
+but typical choices are subtypes of `<:Metric` from Distances.jl.
 """
 function searchstructure(::Type{T}, data::D, metric::M; kwargs...) where
                          {T, D, M}
@@ -68,16 +68,14 @@ function search(ss, query, st::SearchType; kwargs...)
 end
 
 """
-    inrange(ss, query, r; kwargs...) → neighbors
-Find all neighbors of the `query` with distance `≤ r` in the search structure `ss`.
-If none exist, and empty vector (of the same type) is returned.
+    inrange(ss, query, r; kwargs...)
+Basically [`search`](@ref) for `FixedRange(r)` search type.
 """
 inrange(a, b, r; kwargs...) = search(a, b, FixedRange(r); kwargs...)
 
 """
-    knn(ss, query, k::Integer; kwargs...) → neighbors
-Find the `k` nearest neighbors (or approximate ones, depending on `ss`) of the `query`
-in the search structure `ss`.
+    knn(ss, query, k::Integer; kwargs...)
+Basically [`search`](@ref) for `FixedAmount(k)` search type.
 """
 knn(a, b, k::Integer; kwargs...) = search(a, b, FixedAmount(k); kwargs...)
 
