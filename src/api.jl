@@ -5,11 +5,21 @@ to participate in this common API it should extend the following methods:
 Let `T` be the type of your search structure. Make sure that this `SS` is a subtype of
 `SearchStrucutre`. Then define:
 
-* searchstructure(::Type{T}, data, metric)  (this gives `ss`)
-* search(ss::T, query, ::SearchType) (preferably for both SearchType types)
+* searchstructure(::Type{T}, data, metric) → `ss`
+* search(ss::T, query, ::SearchType) → `idxs, ds`
+
+`search` returns the indices of the neighbors (in the original `data`) and the distances from
+the query.
 
 Notice that ::Type{T} only needs the supertype, e.g. `KDTree`, without the type-parameters.
 =#
+
+# TODO: Discuss whether `search` should return:
+# * IDXS+DISTANCES
+# * POINTS+DISTANCES
+# * only IDXS
+# TODO: Discuss if it is worth it (or just too much effort) to implement 2 functions:
+# one returning only indices, one indices and distances...?
 
 export FixedRange, FixedAmount, SearchType
 export search, inrange, knn
@@ -46,9 +56,9 @@ Search type representing the `k` nearest neighbors of the query.
 struct FixedAmount <: SearchType; k::Int; end
 
 """
-    search(ss, query, st::SearchType; kwargs... ) → neighbors
+    search(ss, query, st::SearchType; kwargs... ) → idxs, ds
 Perform a neighbor search in the search structure `ss` for the given
-`query` with search type `st`.
+`query` with search type `st`. Return the
 
 Package-specific keywords could be possible, see the specific nearest neighbor package
 for details.
