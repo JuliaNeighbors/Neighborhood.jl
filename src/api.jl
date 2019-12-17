@@ -57,7 +57,8 @@ struct FixedAmount <: SearchType; k::Int; end
 """
     search(ss, query, st::SearchType; kwargs... ) → idxs, ds
 Perform a neighbor search in the search structure `ss` for the given
-`query` with search type `st`. Return the
+`query` with search type `st`. Return the indices of the neighbors (in the original data)
+and the distances from the query.
 
 Package-specific keywords could be possible, see the specific nearest neighbor package
 for details.
