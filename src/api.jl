@@ -1,9 +1,8 @@
 #=
-This file defines the common API for finding neighbors in Julia. For a package
-to participate in this common API it should extend the following methods:
+This file defines the common API for finding neighbors in Julia.
 
-Let `T` be the type of your search structure. Make sure that this `SS` is a subtype of
-`SearchStrucutre`. Then define:
+Let `T` be the type of the search structure of your package.
+To participate in this common API you should extend the following methods:
 
 * searchstructure(::Type{T}, data, metric) → `ss`
 * search(ss::T, query, ::SearchType) → `idxs, ds`
