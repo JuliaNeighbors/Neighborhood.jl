@@ -4,13 +4,18 @@ This file defines the common API for finding neighbors in Julia.
 Let `T` be the type of the search structure of your package.
 To participate in this common API you should extend the following methods:
 
-* searchstructure(::Type{T}, data, metric) → `ss`
-* search(ss::T, query, ::SearchType) → `idxs, ds`
+* searchstructure(::Type{T}, data, metric) → ss
+* search(ss::T, query, ::SearchType) → idxs
+* dsearch(ss::T, query, ::SearchType) → idxs, ds
 
-`search` returns the indices of the neighbors (in the original `data`) and the distances from
-the query.
-
+`search` returns the indices of the neighbors (in the original `data`).
+`dsearch`  returns the distances from the query as well.
 Notice that ::Type{T} only needs the supertype, e.g. `KDTree`, without the type-parameters.
+
+If possible (allowing performance benefits), you can also extend:
+* bulksearch(ss::T, queries, ::SearchType) → idxs
+* dbulksearch(ss::T, queries, ::SearchType) → idxs, ds
+which do more eficient bulk searches for multiple queries.
 =#
 
 # TODO: Discuss whether `search` should return:
@@ -20,9 +25,9 @@ Notice that ::Type{T} only needs the supertype, e.g. `KDTree`, without the type-
 # TODO: Discuss if it is worth it (or just too much effort) to implement 2 functions:
 # one returning only indices, one indices and distances...?
 
-export FixedRange, FixedAmount, SearchType
+export WithinRange, NeighborNumber, SearchType
 export search, inrange, knn
-export searchstructure, SearchStructure
+export searchstructure
 
 """
 Supertype of all possible search types of the Neighborhood.jl common API.
@@ -43,16 +48,17 @@ function searchstructure(::Type{T}, data::D, metric::M; kwargs...) where
 end
 
 """
-    FixedRange(r) <: SearchType
-Search type representing all neighbors with distance `≤ r` from the query.
+    WithinRange(r::Real) <: SearchType
+Search type representing all neighbors with distance `≤ r` from the query
+(according to the search structure's metric).
 """
-struct FixedRange{R} <: SearchType; r::R; end
+struct WithinRange{R} <: SearchType; r::R; end
 
 """
-    FixedAmount(k) <: SearchType
+    NeighborNumber(k::Int) <: SearchType
 Search type representing the `k` nearest neighbors of the query.
 """
-struct FixedAmount <: SearchType; k::Int; end
+struct NeighborNumber <: SearchType; k::Int; end
 
 """
     search(ss, query, st::SearchType; kwargs... ) → idxs, ds
@@ -69,15 +75,15 @@ end
 
 """
     inrange(ss, query, r; kwargs...)
-Basically [`search`](@ref) for `FixedRange(r)` search type.
+Basically [`search`](@ref) for `WithinRange(r)` search type.
 """
-inrange(a, b, r; kwargs...) = search(a, b, FixedRange(r); kwargs...)
+inrange(a, b, r; kwargs...) = search(a, b, WithinRange(r); kwargs...)
 
 """
     knn(ss, query, k::Integer; kwargs...)
-Basically [`search`](@ref) for `FixedAmount(k)` search type.
+Basically [`search`](@ref) for `NeighborNumber(k)` search type.
 """
-knn(a, b, k::Integer; kwargs...) = search(a, b, FixedAmount(k); kwargs...)
+knn(a, b, k::Integer; kwargs...) = search(a, b, NeighborNumber(k); kwargs...)
 
 
 
