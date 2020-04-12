@@ -31,6 +31,8 @@ The following methods are **extremely useful** in e.g. timeseries analysis.
 search(ss::S, query, t::SearchType, skip; kwargs...)
 bulksearch(ss::S, queries, t::SearchType, skip; kwargs...)
 ```
+(and their "i" complements).
+
 These methods "skip" found neighbors depending on `skip`. In the first method
 `skip` takes one argument: `skip(i)` the index of the found neighbor (in the original data)
 and returns `true` if this neighbor should be skipped.
@@ -74,7 +76,6 @@ function searchstructure(::Type{S}, data::D, metric::M; kwargs...) where
     error("Given type $(S) has not implemented the Neighborhood.jl public API "*
           "for data type $(D) and metric type $(M).")
 end
-metric(ss::S) where {S} = error("Given type $(S) has not implemented `metric`.")
 
 """
     WithinRange(r::Real) <: SearchType
@@ -85,38 +86,85 @@ struct WithinRange{R} <: SearchType; r::R; end
 
 """
     NeighborNumber(k::Int) <: SearchType
-Search type representing the `k` nearest neighbors of the query.
+Search type representing the `k` nearest neighbors of the query (or approximate
+neighbors, depending on the search structure).
 """
 struct NeighborNumber <: SearchType; k::Int; end
 
 """
-    search(ss, query, t::SearchType; kwargs... ) → idxs, ds
+    search(ss, query, t::SearchType [, skip]; kwargs... ) → idxs, ds
 Perform a neighbor search in the search structure `ss` for the given
 `query` with search type `t`. Return the indices of the neighbors (in the original data)
 and the distances from the query.
 
+Optional `skip` function takes as input the index of the found neighbor
+(in the original data) `skip(i)` and returns `true` if this neighbor should be skipped.
+
 Package-specific keywords are possible.
 """
-function search(ss, query, t::SearchType; kwargs...)
-    dsearch(ss, query, t; kwargs...)[1]
+function search(ss::S, query::Q, t::T; kwargs...) where {S, Q, T<: SearchType}
+    error("Given type $(S) has not implemented the Neighborhood.jl public API "*
+          "for data type $(D) and search type $(T).")
+end
+function search(ss::S, query::Q, t::T, skip; kwargs...) where {S, Q, T<: SearchType}
+    error("Given type $(S) has not implemented the Neighborhood.jl public API "*
+          "for data type $(D), search type $(T) and skip function.")
 end
 
 """
-    isearch(ss, query, t::SearchType; kwargs... ) → idxs
+    isearch(args...; kwargs... ) → idxs
 Same as [`search`](@ref) but only return the neighbor indices.
 """
-function isearch(ss, query, t::SearchType; kwargs...)
-    search(ss, query, t; kwargs...)[1]
+isearch(args...; kwargs...) = search(args...; kwargs...)[1]
+
+"""
+    inrange(ss, query, r::Real [, skip]; kwargs...)
+[`search`](@ref) for `WithinRange(r)` search type.
+"""
+inrange(a, b, r; kwargs...) = search(a, b, WithinRange(r); kwargs...)
+inrange(a, b, r, s; kwargs...) = search(a, b, WithinRange(r), s; kwargs...)
+
+"""
+    knn(ss, query, k::Int [, skip]; kwargs...)
+[`search`](@ref) for `NeighborNumber(k)` search type.
+"""
+knn(a, b, k::Integer; kwargs...) = search(a, b, NeighborNumber(k); kwargs...)
+knn(a, b, k::Integer, s; kwargs...) = search(a, b, NeighborNumber(k), s; kwargs...)
+
+###########################################################################################
+# Bulk
+###########################################################################################
+"""
+    bulksearch(ss, queries, t::SearchType [, skip]; kwargs... ) → vec_of_idxs, vec_of_ds
+Same as [`search`](@ref) but many searches are done for many input query points.
+"""
+function bulksearch(ss, queries, t, skip; kwargs...)
+    i1, d1 = search(ss, queries[1], t, i -> skip(i, 1); kwargs...)
+    idxs, ds = [i1], [d1]
+    sizehint!(idxs, length(queries))
+    sizehint!(ds, length(queries))
+    for j in 2:length(queries)
+        sk = i -> skip(i, j)
+        i, d = search(ss, queries[j], t, sk; kwargs...)
+        push!(idxs, i); push!(ds, d)
+    end
+    return idxs, ds
+end
+
+function bulksearch(ss, queries, t; kwargs...)
+    i1, d1 = search(ss, queries[1], args...; kwargs...)
+    idxs, ds = [i1], [d1]
+    sizehint!(idxs, length(queries))
+    sizehint!(ds, length(queries))
+    for j in 2:length(queries)
+        i, d = search(ss, queries[j], t; kwargs...)
+        push!(idxs, i); push!(ds, d)
+    end
+    return idxs, ds
 end
 
 """
-    inrange(ss, query, r; kwargs...)
-Basically [`search`](@ref) for `WithinRange(r)` search type.
+    bulkisearch(ss, queries, t::SearchType [, skip]; kwargs... ) → vec_of_idxs
+Same as [`bulksearch`](@ref) but return only the indices.
 """
-inrange(a, b, r; kwargs...) = search(a, b, WithinRange(r); kwargs...)
-
-"""
-    knn(ss, query, k::Integer; kwargs...)
-Basically [`search`](@ref) for `NeighborNumber(k)` search type.
-"""
-knn(a, b, k::Integer; kwargs...) = search(a, b, NeighborNumber(k); kwargs...)
+bulkisearch(args...; kwargs...) = bulksearch(args...; kwargs...)[1]
