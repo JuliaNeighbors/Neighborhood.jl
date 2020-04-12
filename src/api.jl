@@ -1,51 +1,80 @@
 #=
-This file defines the common API for finding neighbors in Julia.
+# Neighborhood.jl API
 
-Let `T` be the type of the search structure of your package.
+## Mandatory methods
+
+Let `S` be the type of the search structure of your package.
 To participate in this common API you should extend the following methods:
 
-* searchstructure(::Type{T}, data, metric) → ss
-* search(ss::T, query, ::SearchType) → idxs
-* dsearch(ss::T, query, ::SearchType) → idxs, ds
+```julia
+searchstructure(::Type{S}, data, metric)
+search(ss::S, query, t::SearchType; kwargs...) → idxs, ds
+```
+for both types of `t`: `WithinRange, NeighborNumber`.
+`search` returns the indices of the neighbors (in the original `data`) and their
+distances from the `query`.
+Notice that ::Type{S} only needs the supertype, e.g. `KDTree`, without the type-parameters.
 
-`search` returns the indices of the neighbors (in the original `data`).
-`dsearch`  returns the distances from the query as well.
-Notice that ::Type{T} only needs the supertype, e.g. `KDTree`, without the type-parameters.
+## Performance methods
+The following methods are implemented automatically from Neighborhood.jl if you
+extend the mandatory methods. However, if there are performance benefits you should
+write your own extentions.
+```julia
+isearch(ss::S, query, t::SearchType; kwargs...) → idxs  # only indices
+bulksearch(ss::S, queries, ::SearchType; kwargs...) → vec_of_idxs, vec_of_ds
+bulkisearch(ss::S, queries, ::SearchType; kwargs...) → vec_of_idxs
+```
 
-If possible (allowing performance benefits), you can also extend:
-* bulksearch(ss::T, queries, ::SearchType) → idxs
-* dbulksearch(ss::T, queries, ::SearchType) → idxs, ds
-which do more eficient bulk searches for multiple queries.
+## Predicate methods
+The following methods are **extremely useful** in e.g. timeseries analysis.
+```julia
+search(ss::S, query, t::SearchType, skip; kwargs...)
+bulksearch(ss::S, queries, t::SearchType, skip; kwargs...)
+```
+These methods "skip" found neighbors depending on `skip`. In the first method
+`skip` takes one argument: `skip(i)` the index of the found neighbor (in the original data)
+and returns `true` if this neighbor should be skipped.
+In the second version, `skip` takes two arguments `skip(i, j)` where now `j` is simply
+the index of the query that we are currently searching for.
+
+You can kill two birds with one stone and directly implement one method:
+```julia
+search(ss::S, query, t::SearchType, skip = alwaysfalse; kwargs...)
+```
+to satisfy both mandatory API as well as this one.
+
+## Insertion/deletion methods
+Simply extend `Base.insert!` and `Base.deleteat!` for your search structure.
 =#
 
-# TODO: Discuss whether `search` should return:
-# * IDXS+DISTANCES
-# * POINTS+DISTANCES
-# * only IDXS
-# TODO: Discuss if it is worth it (or just too much effort) to implement 2 functions:
-# one returning only indices, one indices and distances...?
+alwaysfalse(ags...; kwargs...) = false
 
 export WithinRange, NeighborNumber, SearchType
 export search, inrange, knn
-export searchstructure
+export searchstructure, SearchStructure
 
 """
 Supertype of all possible search types of the Neighborhood.jl common API.
 """
 abstract type SearchType end
 
+"""
+Supertype of all search structures implementing the Neighborhood.jl common API.
+"""
+abstract type SearchStructure end
 
 """
-    searchstructure(T, data, metric; kwargs...) → st
-Create a search structure `st` of type `T` (e.g. `KDTree, BKTree` etc.) based on the
+    searchstructure(S, data, metric; kwargs...) → ss
+Create a search structure `ss` of type `S` (e.g. `KDTree, BKTree` etc.) based on the
 given `data` and `metric`. The data types and supported metric types are package-specific,
 but typical choices are subtypes of `<:Metric` from Distances.jl.
 """
-function searchstructure(::Type{T}, data::D, metric::M; kwargs...) where
-                         {T, D, M}
-    error("Given type $(T) has not implemented the Neighborhood.jl public API "*
+function searchstructure(::Type{S}, data::D, metric::M; kwargs...) where
+                         {S, D, M}
+    error("Given type $(S) has not implemented the Neighborhood.jl public API "*
           "for data type $(D) and metric type $(M).")
 end
+metric(ss::S) where {S} = error("Given type $(S) has not implemented `metric`.")
 
 """
     WithinRange(r::Real) <: SearchType
@@ -61,16 +90,23 @@ Search type representing the `k` nearest neighbors of the query.
 struct NeighborNumber <: SearchType; k::Int; end
 
 """
-    search(ss, query, st::SearchType; kwargs... ) → idxs, ds
+    search(ss, query, t::SearchType; kwargs... ) → idxs, ds
 Perform a neighbor search in the search structure `ss` for the given
-`query` with search type `st`. Return the indices of the neighbors (in the original data)
+`query` with search type `t`. Return the indices of the neighbors (in the original data)
 and the distances from the query.
 
-Package-specific keywords could be possible, see the specific nearest neighbor package
-for details.
+Package-specific keywords are possible.
 """
-function search(ss, query, st::SearchType; kwargs...)
-    error("`search` is not implemented for this combination of input types.")
+function search(ss, query, t::SearchType; kwargs...)
+    dsearch(ss, query, t; kwargs...)[1]
+end
+
+"""
+    isearch(ss, query, t::SearchType; kwargs... ) → idxs
+Same as [`search`](@ref) but only return the neighbor indices.
+"""
+function isearch(ss, query, t::SearchType; kwargs...)
+    search(ss, query, t; kwargs...)[1]
 end
 
 """
@@ -84,33 +120,3 @@ inrange(a, b, r; kwargs...) = search(a, b, WithinRange(r); kwargs...)
 Basically [`search`](@ref) for `NeighborNumber(k)` search type.
 """
 knn(a, b, k::Integer; kwargs...) = search(a, b, NeighborNumber(k); kwargs...)
-
-
-
-##########################################################################################
-# Delete and insertion: mutable search structures
-##########################################################################################
-
-"""
-    insert!(ss, index, point)
-Insert a new `point` to the search structure `ss` at the given `index`
-(similarly with `Base.insert!`).
-
-The `index` type is package-specific.
-"""
-function Base.insert!(ss::T, index, point) where {T}
-    error("Given type $(T) has either not implemented the Neighborhood.jl public API "*
-          "or uses an immutable search structure.")
-end
-
-"""
-    deleteat!(ss, index)
-Remove the point of the search structure specified by the given `index`
-(similarly with `Base.deletat!`).
-
-The `index` type is package-specific.
-"""
-function Base.deleteat!(ss::T, index) where {T}
-    error("Given type $(T) has either not implemented the Neighborhood.jl public API "*
-          "or uses an immutable search structure.")
-end
