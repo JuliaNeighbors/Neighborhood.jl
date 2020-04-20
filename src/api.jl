@@ -7,7 +7,7 @@ Let `S` be the type of the search structure of your package.
 To participate in this common API you should extend the following methods:
 
 ```julia
-searchstructure(::Type{S}, data, metric)
+searchstructure(::Type{S}, data, metric; kwargs...) → ss
 search(ss::S, query, t::SearchType; kwargs...) → idxs, ds
 ```
 for both types of `t`: `WithinRange, NeighborNumber`.
@@ -49,11 +49,15 @@ to satisfy both mandatory API as well as this one.
 Simply extend `Base.insert!` and `Base.deleteat!` for your search structure.
 =#
 
+"`alwaysfalse(ags...; kwargs...) = false`"
 alwaysfalse(ags...; kwargs...) = false
 
-export WithinRange, NeighborNumber, SearchType
-export search, inrange, knn
-export searchstructure, SearchStructure
+export WithinRange, NeighborNumber
+export searchstructure
+export search, isearch, inrange, knn
+export bulksearch, bulkisearch
+
+# TODO: create function `Theiler(w)` that is a skip funciton with given w
 
 """
 Supertype of all possible search types of the Neighborhood.jl common API.
@@ -61,13 +65,8 @@ Supertype of all possible search types of the Neighborhood.jl common API.
 abstract type SearchType end
 
 """
-Supertype of all search structures implementing the Neighborhood.jl common API.
-"""
-abstract type SearchStructure end
-
-"""
     searchstructure(S, data, metric; kwargs...) → ss
-Create a search structure `ss` of type `S` (e.g. `KDTree, BKTree` etc.) based on the
+Create a search structure `ss` of type `S` (e.g. `KDTree, BKTree, VPTree` etc.) based on the
 given `data` and `metric`. The data types and supported metric types are package-specific,
 but typical choices are subtypes of `<:Metric` from Distances.jl.
 """
@@ -121,15 +120,14 @@ isearch(args...; kwargs...) = search(args...; kwargs...)[1]
     inrange(ss, query, r::Real [, skip]; kwargs...)
 [`search`](@ref) for `WithinRange(r)` search type.
 """
-inrange(a, b, r; kwargs...) = search(a, b, WithinRange(r); kwargs...)
-inrange(a, b, r, s; kwargs...) = search(a, b, WithinRange(r), s; kwargs...)
+inrange(a, b, r, args...; kwargs...) = search(a, b, WithinRange(r), args...; kwargs...)
 
 """
     knn(ss, query, k::Int [, skip]; kwargs...)
 [`search`](@ref) for `NeighborNumber(k)` search type.
 """
-knn(a, b, k::Integer; kwargs...) = search(a, b, NeighborNumber(k); kwargs...)
-knn(a, b, k::Integer, s; kwargs...) = search(a, b, NeighborNumber(k), s; kwargs...)
+knn(a, b, k::Integer, args...; kwargs...) =
+search(a, b, NeighborNumber(k), args...; kwargs...)
 
 ###########################################################################################
 # Bulk
@@ -137,6 +135,9 @@ knn(a, b, k::Integer, s; kwargs...) = search(a, b, NeighborNumber(k), s; kwargs.
 """
     bulksearch(ss, queries, t::SearchType [, skip]; kwargs... ) → vec_of_idxs, vec_of_ds
 Same as [`search`](@ref) but many searches are done for many input query points.
+
+In this case `skip` takes two arguments `skip(i, j)` where now `j` is simply
+the index of the query that we are currently searching for.
 """
 function bulksearch(ss, queries, t, skip; kwargs...)
     i1, d1 = search(ss, queries[1], t, i -> skip(i, 1); kwargs...)
@@ -151,20 +152,20 @@ function bulksearch(ss, queries, t, skip; kwargs...)
     return idxs, ds
 end
 
-function bulksearch(ss, queries, t; kwargs...)
-    i1, d1 = search(ss, queries[1], args...; kwargs...)
-    idxs, ds = [i1], [d1]
-    sizehint!(idxs, length(queries))
-    sizehint!(ds, length(queries))
-    for j in 2:length(queries)
-        i, d = search(ss, queries[j], t; kwargs...)
-        push!(idxs, i); push!(ds, d)
-    end
-    return idxs, ds
-end
-
 """
     bulkisearch(ss, queries, t::SearchType [, skip]; kwargs... ) → vec_of_idxs
 Same as [`bulksearch`](@ref) but return only the indices.
 """
 bulkisearch(args...; kwargs...) = bulksearch(args...; kwargs...)[1]
+
+"""
+    vecskipfilter!(vec_of_idxs, skip)
+Apply 2-argument `skip` to pre-calculated `vec_of_idxs`.
+"""
+function vecskipfilter!(vec_of_idxs, skip)
+    for j in 1:length(vec_of_idxs)
+        @inbounds idxs = vec_of_idxs[j]
+        filter!(i -> skip(i, j), idxs)
+    end
+    return vec_of_idxs
+end
