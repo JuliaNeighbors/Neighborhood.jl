@@ -2,3 +2,17 @@ name = "Neighborhood"
 uuid = "645ca80c-8b79-4109-87ea-e1f58159d116"
 authors = ["Datseris <datseris.george@gmail.com>"]
 version = "0.1.0"
+repo = "https://github.com/JuliaNeighbors/Neighborhood.jl.git"
+
+
+[compat]
+julia = "1"
+
+[extras]
+Distances = "b4f34e82-e78d-54a5-968a-f98e89d6e8f7"
+NearestNeighbors = "b8a86587-4115-5ab1-83bc-aa920d37bbce"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test", "Distances", "NearestNeighbors", "StaticArrays"]

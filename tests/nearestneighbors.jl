@@ -2,7 +2,7 @@ using Distances
 import NearestNeighbors
 import NearestNeighbors: KDTree
 
-using Neighborhood: alwaysfalse, vecskipfilter!
+using Neighborhood: alwaysfalse
 
 ###########################################################################################
 # Standard API
@@ -17,7 +17,7 @@ end
 
 function Neighborhood.search(tree::KDTree, query, t::WithinRange, skip=alwaysfalse; sortds=true)
     idxs = NearestNeighbors.inrange(tree, query, t.r)
-    skip ≠ alwaysfalse && filter!(skip, idxs)
+    skip ≠ alwaysfalse && filter!(!skip, idxs)
     ds = _NN_get_ds(tree, query, idxs)
     if sortds # sort according to distances
         sp = sortperm(ds)
@@ -27,7 +27,7 @@ function Neighborhood.search(tree::KDTree, query, t::WithinRange, skip=alwaysfal
     return idxs, ds
 end
 
-function _NN_get_ds(tree, query, idxs)
+function _NN_get_ds(tree::KDTree, query, idxs)
     if tree.reordered
         ds = [
             evaluate(tree.metric, query, tree.data[
@@ -61,4 +61,9 @@ ridxs_srt, rds_srt = inrange(tree2, query,  maximum(ds))
 @test ridxs_srt == idxs
 @test rds_srt == ds
 
-# TODO: Predicate tests
+__idxs, = inrange(tree1, queries[1], 0.005)
+@test sort!(__idxs) == 48:52
+__idxs, = inrange(tree1, queries[1], 0.005, theiler1(nidxs[1]))
+@test sort!(__idxs) == 50:52
+__idxs, = inrange(tree1, queries[2], 0.005, theiler2(nidxs[2]))
+@test isempty(__idxs)

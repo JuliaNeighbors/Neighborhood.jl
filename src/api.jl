@@ -137,15 +137,27 @@ search(a, b, NeighborNumber(k), args...; kwargs...)
 Same as [`search`](@ref) but many searches are done for many input query points.
 
 In this case `skip` takes two arguments `skip(i, j)` where now `j` is simply
-the index of the query that we are currently searching for.
+the index of the query that we are currently searching for (`j` is the index in
+`queries` and goes from 1 to `length(queries)`).
 """
+function bulksearch(ss, queries, t; kwargs...)
+    i1, d1 = search(ss, queries[1], t; kwargs...)
+    idxs, ds = [i1], [d1]
+    sizehint!(idxs, length(queries))
+    sizehint!(ds, length(queries))
+    for j in 2:length(queries)
+        i, d = search(ss, queries[j], t; kwargs...)
+        push!(idxs, i); push!(ds, d)
+    end
+    return idxs, ds
+end
 function bulksearch(ss, queries, t, skip; kwargs...)
     i1, d1 = search(ss, queries[1], t, i -> skip(i, 1); kwargs...)
     idxs, ds = [i1], [d1]
     sizehint!(idxs, length(queries))
     sizehint!(ds, length(queries))
     for j in 2:length(queries)
-        sk = i -> skip(i, j)
+        sk = k -> skip(i, k)
         i, d = search(ss, queries[j], t, sk; kwargs...)
         push!(idxs, i); push!(ds, d)
     end
@@ -157,15 +169,3 @@ end
 Same as [`bulksearch`](@ref) but return only the indices.
 """
 bulkisearch(args...; kwargs...) = bulksearch(args...; kwargs...)[1]
-
-"""
-    vecskipfilter!(vec_of_idxs, skip)
-Apply 2-argument `skip` to pre-calculated `vec_of_idxs`.
-"""
-function vecskipfilter!(vec_of_idxs, skip)
-    for j in 1:length(vec_of_idxs)
-        @inbounds idxs = vec_of_idxs[j]
-        filter!(i -> skip(i, j), idxs)
-    end
-    return vec_of_idxs
-end
