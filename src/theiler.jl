@@ -16,7 +16,7 @@ However `theiler` can also be used in single searches. `theiler(n)` (with one ar
 generates the function `i -> abs(i-n) ≤ t.w`. So `theiler(n)` can be given to
 [`search`](@ref) as the `skip` argument.
 """
-struct Theiler{R}
+struct Theiler{R} <: Function
     w::Int
     nidxs::R
 end
