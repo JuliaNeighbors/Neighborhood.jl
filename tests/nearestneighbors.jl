@@ -121,9 +121,7 @@ end
 function vecskipfilter!(vec_of_idxs, vec_of_ds, skip)
     for j in 1:length(vec_of_idxs)
         @inbounds idxs = vec_of_idxs[j]
-        @show idxs
         todelete = [i for i in 1:length(idxs) if skip(idxs[i], j)]
-        @show todelete
         deleteat!(idxs, todelete)
         deleteat!(vec_of_ds[j], todelete)
     end

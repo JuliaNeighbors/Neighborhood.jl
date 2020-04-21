@@ -14,4 +14,4 @@ theiler2 = Theiler(2, nidxs)
 r = 0.1
 k = 5
 
-# include("nearestneighbors.jl")
+include("nearestneighbors.jl")
