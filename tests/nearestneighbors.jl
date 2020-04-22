@@ -1,3 +1,5 @@
+@testset "KDTree" begin
+
 tree1 = searchstructure(KDTree, data, Euclidean(); reorder = true)
 tree2 = searchstructure(KDTree, data, Euclidean(); reorder = false)
 
@@ -68,4 +70,6 @@ vec_of_idxs, vec_of_ds = bulksearch(tree1, queries, WithinRange(0.002), theiler2
 for (x, y) in zip(vec_of_idxs, vec_of_ds)
     @test isempty(x)
     @test isempty(y)
+end
+
 end

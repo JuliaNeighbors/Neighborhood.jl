@@ -8,11 +8,11 @@ searchstructure
 ```
 
 All currently supported search structures are:
-```@example
-using Neighborhood
-for ss in Neighborhood.SSS
-    println(ss)
-end
+```@example sss
+using Neighborhood # hide
+for ss in Neighborhood.SSS # hide
+    println(ss) # hide
+end # hide
 ```
 
 ## Search functions

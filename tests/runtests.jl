@@ -1,4 +1,4 @@
-using Test, Neighborhood, StaticArrays, Random
+using Test, Neighborhood, StaticArrays, Random, Distances
 
 Random.seed!(54525)
 data = [rand(SVector{3}) for i in 1:1000]

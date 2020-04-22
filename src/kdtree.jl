@@ -2,7 +2,7 @@ using Distances
 import NearestNeighbors
 import NearestNeighbors: KDTree
 
-using Neighborhood: alwaysfalse
+export KDTree
 
 ###########################################################################################
 # Standard API
