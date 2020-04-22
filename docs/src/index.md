@@ -1,0 +1,43 @@
+# Public API
+Neighborhood.jl is a Julia package that provides a unified interface for doing neighbor searches in Julia.
+This interface is described in this page.
+
+## Search Structures
+```@docs
+searchstructure
+```
+
+All currently supported search structures are:
+```@example
+using Neighborhood
+for ss in Neighborhood.SSS
+    println(ss)
+end
+```
+
+## Search functions
+```@docs
+search
+isearch
+inrange
+knn
+```
+
+### Bulk searches
+Some packages support higher performance when doing bulk searches (instead of individually calling `search` many times).
+```@docs
+bulksearch
+bulkisearch
+```
+
+### Theiler window
+```@docs
+Theiler
+```
+
+## Search types
+```@docs
+SearchType
+WithinRange
+NeighborNumber
+```
