@@ -1,58 +1,7 @@
-#=
-# Neighborhood.jl API
-
-## Mandatory methods
-
-Let `S` be the type of the search structure of your package.
-To participate in this common API you should extend the following methods:
-
-```julia
-searchstructure(::Type{S}, data, metric; kwargs...) → ss
-search(ss::S, query, t::SearchType; kwargs...) → idxs, ds
-```
-for both types of `t`: `WithinRange, NeighborNumber`.
-`search` returns the indices of the neighbors (in the original `data`) and their
-distances from the `query`.
-Notice that ::Type{S} only needs the supertype, e.g. `KDTree`, without the type-parameters.
-
-## Performance methods
-The following methods are implemented automatically from Neighborhood.jl if you
-extend the mandatory methods. However, if there are performance benefits you should
-write your own extentions.
-```julia
-isearch(ss::S, query, t::SearchType; kwargs...) → idxs  # only indices
-bulksearch(ss::S, queries, ::SearchType; kwargs...) → vec_of_idxs, vec_of_ds
-bulkisearch(ss::S, queries, ::SearchType; kwargs...) → vec_of_idxs
-```
-
-## Predicate methods
-The following methods are **extremely useful** in e.g. timeseries analysis.
-```julia
-search(ss::S, query, t::SearchType, skip; kwargs...)
-bulksearch(ss::S, queries, t::SearchType, skip; kwargs...)
-```
-(and their "i" complements).
-
-These methods "skip" found neighbors depending on `skip`. In the first method
-`skip` takes one argument: `skip(i)` the index of the found neighbor (in the original data)
-and returns `true` if this neighbor should be skipped.
-In the second version, `skip` takes two arguments `skip(i, j)` where now `j` is simply
-the index of the query that we are currently searching for.
-
-You can kill two birds with one stone and directly implement one method:
-```julia
-search(ss::S, query, t::SearchType, skip = alwaysfalse; kwargs...)
-```
-to satisfy both mandatory API as well as this one.
-
-## Insertion/deletion methods
-Simply extend `Base.insert!` and `Base.deleteat!` for your search structure.
-=#
-
 "`alwaysfalse(ags...; kwargs...) = false`"
 alwaysfalse(ags...; kwargs...) = false
 
-export WithinRange, NeighborNumber
+export WithinRange, NeighborNumber, SearchType
 export searchstructure
 export search, isearch, inrange, knn
 export bulksearch, bulkisearch
@@ -93,7 +42,7 @@ struct NeighborNumber <: SearchType; k::Int; end
 """
     search(ss, query, t::SearchType [, skip]; kwargs... ) → idxs, ds
 Perform a neighbor search in the search structure `ss` for the given
-`query` with search type `t`. Return the indices of the neighbors (in the original data)
+`query` with search type `t` (see [`SearchType`](@ref)). Return the indices of the neighbors (in the original data)
 and the distances from the query.
 
 Optional `skip` function takes as input the index of the found neighbor
