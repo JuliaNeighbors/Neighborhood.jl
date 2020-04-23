@@ -1,4 +1,3 @@
-using Distances
 import NearestNeighbors
 import NearestNeighbors: KDTree
 
@@ -91,7 +90,7 @@ end
 function vecskipfilter!(vec_of_idxs, skip)
     for j in 1:length(vec_of_idxs)
         @inbounds idxs = vec_of_idxs[j]
-        filter!(i -> skip(i, j), idxs)
+        filter!(i -> !skip(i, j), idxs)
     end
     return vec_of_idxs
 end
