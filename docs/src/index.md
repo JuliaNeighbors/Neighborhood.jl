@@ -23,21 +23,21 @@ inrange
 knn
 ```
 
-### Bulk searches
+## Search types
+```@docs
+SearchType
+WithinRange
+NeighborNumber
+```
+
+## Bulk searches
 Some packages support higher performance when doing bulk searches (instead of individually calling `search` many times).
 ```@docs
 bulksearch
 bulkisearch
 ```
 
-### Theiler window
+## Theiler window
 ```@docs
 Theiler
-```
-
-## Search types
-```@docs
-SearchType
-WithinRange
-NeighborNumber
 ```

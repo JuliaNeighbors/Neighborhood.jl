@@ -13,7 +13,7 @@ In addition, if the given argument `nidxs` is _not_ `nothing`, then
 queries in the original data)
 
 However `theiler` can also be used in single searches. `theiler(n)` (with one argument)
-generates the function `i -> abs(i-n) ≤ t.w`. So `theiler(n)` can be given to
+generates the function `i -> abs(i-n) ≤ w`. So `theiler(n)` can be given to
 [`search`](@ref) as the `skip` argument.
 """
 struct Theiler{R} <: Function
