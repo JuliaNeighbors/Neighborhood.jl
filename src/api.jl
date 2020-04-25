@@ -6,8 +6,6 @@ export searchstructure
 export search, isearch, inrange, knn
 export bulksearch, bulkisearch
 
-# TODO: create function `Theiler(w)` that is a skip funciton with given w
-
 """
 Supertype of all possible search types of the Neighborhood.jl common API.
 """
