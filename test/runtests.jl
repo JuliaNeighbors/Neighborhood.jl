@@ -1,4 +1,5 @@
 using Test, Neighborhood, StaticArrays, Random, Distances
+using Neighborhood: datatype, getmetric
 
 Random.seed!(54525)
 data = [rand(SVector{3}) for i in 1:1000]

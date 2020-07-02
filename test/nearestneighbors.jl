@@ -3,6 +3,11 @@
 tree1 = searchstructure(KDTree, data, Euclidean(); reorder = true)
 tree2 = searchstructure(KDTree, data, Euclidean(); reorder = false)
 
+@test datatype(tree1) === datatype(typeof(tree1)) === eltype(data)
+@test getmetric(tree1) === tree1.metric
+@test datatype(tree2) === datatype(typeof(tree2)) === eltype(data)
+@test getmetric(tree2) === tree2.metric
+
 idxs, ds = knn(tree1, query, 5)
 @test issorted(ds)
 @test isearch(tree1, query, NeighborNumber(5)) == idxs

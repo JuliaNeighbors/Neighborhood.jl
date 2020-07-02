@@ -10,6 +10,9 @@ function Neighborhood.searchstructure(::Type{KDTree}, data, metric; kwargs...)
     return KDTree(data, metric; kwargs...)
 end
 
+datatype(::Type{<:KDTree{V}}) where V = V
+getmetric(tree::KDTree) = tree.metric
+
 function Neighborhood.search(tree::KDTree, query, t::NeighborNumber, skip=alwaysfalse; sortds=true)
     return NearestNeighbors.knn(tree, query, t.k, sortds, skip)
 end

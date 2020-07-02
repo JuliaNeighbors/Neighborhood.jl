@@ -39,6 +39,22 @@ neighbors, depending on the search structure).
 struct NeighborNumber <: SearchType; k::Int; end
 
 """
+    datatype(::Type{S}) :: Type
+
+Get the type of the data points (arguments to the metric function) of a search
+struture of type `S`.
+"""
+datatype(::Type) = Any
+datatype(ss) = datatype(typeof(ss))
+
+"""
+    getmetric(ss)
+
+Get the metric function used by the search structure `ss`.
+"""
+function getmetric end
+
+"""
     search(ss, query, t::SearchType [, skip]; kwargs... ) → idxs, ds
 Perform a neighbor search in the search structure `ss` for the given
 `query` with search type `t` (see [`SearchType`](@ref)). Return the indices of the neighbors (in the original data)

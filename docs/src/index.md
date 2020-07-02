@@ -15,6 +15,12 @@ for ss in Neighborhood.SSS # hide
 end # hide
 ```
 
+The following functions are defined for search structures:
+```@docs
+Neighborhood.datatype
+Neighborhood.getmetric
+```
+
 ## Search functions
 ```@docs
 search
