@@ -10,7 +10,7 @@ NearestNeighbors = "b8a86587-4115-5ab1-83bc-aa920d37bbce"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
-Distances = "0.8"
+Distances = "0.8, 0.9"
 NearestNeighbors = "0.4"
 julia = "1"
 
