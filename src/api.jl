@@ -121,7 +121,7 @@ function bulksearch(ss, queries, t, skip; kwargs...)
     sizehint!(idxs, length(queries))
     sizehint!(ds, length(queries))
     for j in 2:length(queries)
-        sk = k -> skip(i, k)
+        sk = k -> skip(j, k)
         i, d = search(ss, queries[j], t, sk; kwargs...)
         push!(idxs, i); push!(ds, d)
     end
