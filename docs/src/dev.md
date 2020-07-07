@@ -60,7 +60,7 @@ Simply extend `Base.insert!` and `Base.deleteat!` for your search structure.
 
 The [`Neighborhood.Testing`](@ref) submodule contains utilities for testing the
 return value of [`search`](@ref) and related functions for your search structure.
-These functions use `Test.@test` internally, so just call within a `@testset`
+Most of these functions use `Test.@test` internally, so just call within a `@testset`
 in your unit tests.
 
 ```@docs
