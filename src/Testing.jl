@@ -89,8 +89,8 @@ Checks the following:
 function check_search_results(data, metric, results, query, t, skip=nothing)
     idxs, ds = results
     @test ds == [metric(query, data[i]) for i in idxs]
-
     !isnothing(skip) && @test !any(map(skip, idxs))
+    _check_search_results(data, metric, results, query, t, skip)
 end
 
 function _check_search_results(data, metric, (idxs, ds), query, t::NeighborNumber, skip)
