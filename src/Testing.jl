@@ -4,13 +4,37 @@ module Testing
 using Test
 using Neighborhood
 
-export search_allfuncs, check_search_results, test_bulksearch
+export cmp_search_results, search_allfuncs, check_search_results, test_bulksearch
 
 
 """
 Get arguments tuple to `search`, using the 3-argument version if `skip=nothing`.
 """
 get_search_args(ss, query, t, skip) = isnothing(skip) ? (ss, query, t) : (ss, query, t, skip)
+
+
+"""
+    cmp_search_results(results...)::Bool
+
+Compare two or more sets of search results (`(idxs, ds)` tuples) and check that
+they are identical up to ordering.
+"""
+function cmp_search_results(results::Tuple{Vector, Vector}...)
+    length(results) < 2 && error("Expected at least two sets of results")
+
+    idxs1, ds1 = results[1]
+    rest = results[2:end]
+
+    idxset = Set(idxs1)
+    dist_map = Dict(i => d for (i, d) in zip(idxs1, ds1))
+
+    for (idxs_i, ds_i) in rest
+        Set(idxs_i) == idxset || return false
+        all(dist_map[i] == d for (i, d) in zip(idxs_i, ds_i)) || return false
+    end
+
+    return true
+end
 
 
 """
@@ -27,8 +51,8 @@ function search_allfuncs(ss, query, t, skip=nothing)
     args = get_search_args(ss, query, t, skip)
     idxs, ds = result = search(args...)
 
-    @test isearch(args...) == idxs
-    @test _alt_search_func(args...) == result
+    @test Set(isearch(args...)) == Set(idxs)
+    cmp_search_results(result, _alt_search_func(args...))
 
     return result
 end
@@ -55,7 +79,6 @@ methods of all functions will be called. Uses `Test.@test` internally.
 
 Checks the following:
 * `results` is a 2-tuple of `(idxs, ds)`.
-* `ds` is sorted.
 * `ds[i] == metric(query, data[i])`.
 * `skip(i)` is false for all `i` in `idxs`.
 * For `t::NeighborNumber`:
@@ -65,8 +88,6 @@ Checks the following:
 """
 function check_search_results(data, metric, results, query, t, skip=nothing)
     idxs, ds = results
-
-    @test issorted(ds)
     @test ds == [metric(query, data[i]) for i in idxs]
 
     !isnothing(skip) && @test !any(map(skip, idxs))
