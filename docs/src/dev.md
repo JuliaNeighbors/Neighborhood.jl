@@ -54,3 +54,19 @@ to satisfy both mandatory API as well as this one.
 
 ## Insertion/deletion methods
 Simply extend `Base.insert!` and `Base.deleteat!` for your search structure.
+
+
+## Testing
+
+The [`Neighborhood.Testing`](@ref) submodule contains utilities for testing the
+return value of [`search`](@ref) and related functions for your search structure.
+Most of these functions use `Test.@test` internally, so just call within a `@testset`
+in your unit tests.
+
+```@docs
+Neighborhood.Testing
+Neighborhood.Testing.cmp_search_results
+Neighborhood.Testing.search_allfuncs
+Neighborhood.Testing.check_search_results
+Neighborhood.Testing.test_bulksearch
+```
