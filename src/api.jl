@@ -67,11 +67,11 @@ Package-specific keywords are possible.
 """
 function search(ss::S, query::Q, t::T; kwargs...) where {S, Q, T<: SearchType}
     error("Given type $(S) has not implemented the Neighborhood.jl public API "*
-          "for data type $(D) and search type $(T).")
+          "for data type $(Q) and search type $(T).")
 end
 function search(ss::S, query::Q, t::T, skip; kwargs...) where {S, Q, T<: SearchType}
     error("Given type $(S) has not implemented the Neighborhood.jl public API "*
-          "for data type $(D), search type $(T) and skip function.")
+          "for data type $(Q), search type $(T) and skip function.")
 end
 
 """
