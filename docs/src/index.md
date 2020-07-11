@@ -43,6 +43,20 @@ bulksearch
 bulkisearch
 ```
 
+## Brute-force searches
+
+The [`BruteForceSearch`](@ref) "search structure" performs a linear search
+through its data array, calculating the distance from the query to each data
+point. This is the slowest possible implementation but can be used to check
+results from other search structures for correctness. The
+[`bruteforcesearch`](@ref) function can be used instead without having to create
+the search structure.
+
+```@docs
+bruteforcesearch
+BruteForceSearch
+```
+
 ## Theiler window
 ```@docs
 Theiler
