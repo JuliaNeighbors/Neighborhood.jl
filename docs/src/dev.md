@@ -66,6 +66,7 @@ in your unit tests.
 ```@docs
 Neighborhood.Testing
 Neighborhood.Testing.cmp_search_results
+Neighborhood.Testing.cmp_bruteforce
 Neighborhood.Testing.search_allfuncs
 Neighborhood.Testing.check_search_results
 Neighborhood.Testing.test_bulksearch

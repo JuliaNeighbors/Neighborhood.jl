@@ -3,8 +3,10 @@ module Testing
 
 using Test
 using Neighborhood
+using Neighborhood: bruteforcesearch
 
-export cmp_search_results, search_allfuncs, check_search_results, test_bulksearch
+export cmp_search_results, cmp_bruteforce, search_allfuncs, check_search_results,
+       test_bulksearch
 
 
 """
@@ -34,6 +36,27 @@ function cmp_search_results(results::Tuple{Vector, Vector}...)
     end
 
     return true
+end
+
+
+"""
+    cmp_bruteforce(results, data, metric, query, t[, skip])::Bool
+
+Check whether `results` returned from [`search`](@ref) match those computed
+with [`bruteforcesearch`](@ref)`(data, metric, query, t[, skip])` (up to order).
+`skip` may be `nothing`, which calls the 4-argument method.
+
+**Caution:** results of a `NeighborNumber` search are only expected to match if
+the distances from `query` to each point in `data` are all distinct, otherwise
+there may be some ambiguity in which data points are included.
+"""
+function cmp_bruteforce(results, data, metric, query, t, skip=nothing)
+    bf = if isnothing(skip)
+        bruteforcesearch(data, metric, query, t)
+    else
+        bruteforcesearch(data, metric, query, t, skip)
+    end
+    return cmp_search_results(results, bf)
 end
 
 
@@ -74,8 +97,9 @@ structure `ss` with data `data` and metric `metric`.
 
 Note that this does not calculate the known correct value to compare to (which
 may be expensive for large data sets), just that the results have the
-expected properties. `skip` may be `nothing`, in which case the 3-argument
-methods of all functions will be called. Uses `Test.@test` internally.
+expected properties. Use [`cmp_bruteforce`] for a more exact test.
+`skip` may be `nothing`, in which case the 3-argument methods of all functions
+will be called. Uses `Test.@test` internally.
 
 Checks the following:
 * `results` is a 2-tuple of `(idxs, ds)`.
