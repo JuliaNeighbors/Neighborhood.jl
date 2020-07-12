@@ -1,6 +1,6 @@
 metric = Euclidean()
 dists = [metric(query, d) for d in data]
-ss = searchstructure(BruteForceSearch, data, metric)
+ss = searchstructure(BruteForce, data, metric)
 
 skip3(i) = i % 3 == 0
 skip3inv(i) = !skip3(i)
@@ -22,7 +22,7 @@ end
     @test idxs1 == sortperm(dists)[1:k]
     check_search_results(data, metric, results1, query, t)
 
-    # Using BruteForceSearch instance
+    # Using BruteForce instance
     @test search_allfuncs(ss, query, t) == results1
 
     # Again with skip function
@@ -44,7 +44,7 @@ end
     @test Set(ds1) == Set(filter(<=(r), dists))
     check_search_results(data, metric, results1, query, t)
 
-    # Using BruteForceSearch instance
+    # Using BruteForce instance
     @test search_allfuncs(ss, query, t) == results1
 
     # Again with skip function

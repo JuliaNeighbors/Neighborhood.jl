@@ -1,5 +1,5 @@
 using Test, Neighborhood, StaticArrays, Random, Distances
-using Neighborhood: datatype, getmetric, bruteforcesearch, BruteForceSearch
+using Neighborhood: datatype, getmetric, bruteforcesearch, BruteForce
 using Neighborhood.Testing
 
 

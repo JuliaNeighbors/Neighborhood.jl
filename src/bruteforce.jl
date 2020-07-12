@@ -32,23 +32,23 @@ end
 
 
 """
-    BruteForceSearch
+    BruteForce
 
 A "search structure" which simply performs a brute-force search through the
 entire data array.
 """
-struct BruteForceSearch{T, M}
+struct BruteForce{T, M}
     data::Vector{T}
     metric::M
 
-    BruteForceSearch(data::Vector, metric) = new{eltype(data), typeof(metric)}(data, metric)
+    BruteForce(data::Vector, metric) = new{eltype(data), typeof(metric)}(data, metric)
 end
 
-searchstructure(::Type{BruteForceSearch}, data, metric) = BruteForceSearch(data, metric)
+searchstructure(::Type{BruteForce}, data, metric) = BruteForce(data, metric)
 
-datatype(::Type{<:BruteForceSearch{T}}) where T = T
-getmetric(bf::BruteForceSearch) = bf.metric
+datatype(::Type{<:BruteForce{T}}) where T = T
+getmetric(bf::BruteForce) = bf.metric
 
-function search(bf::BruteForceSearch, query, t::SearchType, skip=alwaysfalse)
+function search(bf::BruteForce, query, t::SearchType, skip=alwaysfalse)
     bruteforcesearch(bf.data, bf.metric, query, t, skip)
 end

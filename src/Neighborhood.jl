@@ -11,6 +11,6 @@ include("kdtree.jl")
 include("Testing.jl")
 
 "Currently supported search structures"
-const SSS = [BruteForceSearch, KDTree]
+const SSS = [BruteForce, KDTree]
 
 end  # module Neighborhood
