@@ -43,8 +43,8 @@ end
     cmp_bruteforce(results, data, metric, query, t[, skip])::Bool
 
 Check whether `results` returned from [`search`](@ref) match those computed
-with [`bruteforcesearch`](@ref)`(data, metric, query, t[, skip])` (up to order).
-`skip` may be `nothing`, which calls the 4-argument method.
+with [`Neighborhood.bruteforcesearch`](@ref)`(data, metric, query, t[, skip])`
+(up to order). `skip` may be `nothing`, which calls the 4-argument method.
 
 **Caution:** results of a `NeighborNumber` search are only expected to match if
 the distances from `query` to each point in `data` are all distinct, otherwise
