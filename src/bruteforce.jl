@@ -1,3 +1,6 @@
+export BruteForce
+
+
 """
     bruteforcesearch(data, metric, query, t::SearchType[, skip])
 
