@@ -1,5 +1,5 @@
 using Test, Neighborhood, StaticArrays, Random, Distances
-using Neighborhood: datatype, getmetric
+using Neighborhood: datatype, getmetric, bruteforcesearch
 using Neighborhood.Testing
 
 
@@ -17,5 +17,8 @@ theiler2 = Theiler(2, nidxs)
 r = 0.1
 k = 5
 
+
+@testset "Utils" begin include("util.jl") end
 @testset "Neighborhood.Testing" begin include("Testing.jl") end
+@testset "Brute force" begin include("bruteforce.jl") end
 include("nearestneighbors.jl")
