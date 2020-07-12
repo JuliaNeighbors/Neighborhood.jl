@@ -40,6 +40,73 @@ end
 
 
 """
+    knn_bf_ties(data, metric, query, k[, skip])
+
+Perform a brute-force KNN search but account for ties for the `k`th nearest
+neighbor, as can happen with some discrete metrics. This can be used to test the
+results of KNN queries where there is more than one possible valid result.
+
+Returns a 2-tuple of index vectors. The first contains the indices of data points
+closer than the tied distance (at most `k -1`). The second contains the indices
+of data points tied for `k`th nearest.
+
+A valid KNN search result should contain all indices in the first vector and a
+subset of the indices in the 2nd vector.
+
+
+# Examples
+
+```jldoctest lab1
+using Neighborhood.Testing: knn_bf_ties
+
+metric = (a, b) -> abs(a - b)
+
+data = [13, 14, 11, 5, 17, 18, 2, 9, 8, 6]
+
+query = 10
+
+nearest, ties = knn_bf_ties(data, metric, query, 5)
+
+# output
+
+([3, 8, 9, 1], [2, 10])
+```
+
+```jldoctest lab1
+dists = [metric(query, d) for d in data]
+
+dists[nearest], dists[ties]
+
+# output
+
+([1, 1, 2, 3], [4, 4])
+```
+"""
+function knn_bf_ties(data, metric, query, k::Int, skip=nothing)
+    dists = [metric(query, d) for d in data]
+    indices = sortperm(dists)
+    !isnothing(skip) && filter!(i -> !skip(i), indices)
+
+    k = min(k, length(indices))
+    maxd = dists[indices[k]]
+
+    # First tie
+    kmin = k
+    while kmin > 1 && dists[indices[kmin-1]] == maxd
+        kmin -= 1
+    end
+
+    # Last tie
+    kmax = k
+    while kmax < length(indices) && dists[indices[kmax+1]] == maxd
+        kmax += 1
+    end
+
+    return indices[1:(kmin-1)], indices[kmin:kmax]
+end
+
+
+"""
     cmp_bruteforce(results, data, metric, query, t[, skip])::Bool
 
 Check whether `results` returned from [`search`](@ref) match those computed
@@ -50,9 +117,19 @@ with [`bruteforcesearch`](@ref)`(data, metric, query, t[, skip])` (up to order).
 the distances from `query` to each point in `data` are all distinct, otherwise
 there may be some ambiguity in which data points are included.
 """
-function cmp_bruteforce(results, data, metric, query, t, skip=nothing)
+function cmp_bruteforce end
+
+function cmp_bruteforce(results, data, metric, query, t::WithinRange, skip=nothing)
     bf = bruteforcesearch(data, metric, query, t, skip)
     return cmp_search_results(results, bf)
+end
+
+function cmp_bruteforce(results, data, metric, query, t::NeighborNumber, skip=nothing)
+    idxs, ds = results
+    nearest, ties = knn_bf_ties(data, metric, query, t.k, skip)
+
+    @test nearest ⊂ idxs
+    @test setdiff(idxs, nearest) ⊆ ties
 end
 
 
