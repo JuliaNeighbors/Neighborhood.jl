@@ -1,4 +1,4 @@
-using Test, Neighborhood, StaticArrays, Random, Distances
+using Test, Neighborhood, Documenter, StaticArrays, Random, Distances
 using Neighborhood: datatype, getmetric, bruteforcesearch, BruteForceSearch
 using Neighborhood.Testing
 
@@ -17,6 +17,8 @@ theiler2 = Theiler(2, nidxs)
 r = 0.1
 k = 5
 
+
+doctest(Neighborhood)
 
 @testset "Utils" begin include("util.jl") end
 @testset "Neighborhood.Testing" begin include("Testing.jl") end
