@@ -51,11 +51,7 @@ the distances from `query` to each point in `data` are all distinct, otherwise
 there may be some ambiguity in which data points are included.
 """
 function cmp_bruteforce(results, data, metric, query, t, skip=nothing)
-    bf = if isnothing(skip)
-        bruteforcesearch(data, metric, query, t)
-    else
-        bruteforcesearch(data, metric, query, t, skip)
-    end
+    bf = bruteforcesearch(data, metric, query, t, skip)
     return cmp_search_results(results, bf)
 end
 

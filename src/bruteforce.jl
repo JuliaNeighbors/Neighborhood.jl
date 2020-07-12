@@ -7,20 +7,20 @@ Perform a brute-force search of type `t` against data array `data`
 function bruteforcesearch end
 
 
-function bruteforcesearch(data, metric, query, t::NeighborNumber, skip=alwaysfalse)
+function bruteforcesearch(data, metric, query, t::NeighborNumber, skip=nothing)
     dists = [metric(query, d) for d in data]
     indices = sortperm(dists)
-    filter!(i -> !skip(i), indices)
+    !isnothing(skip) && filter!(i -> !skip(i), indices)
     length(indices) > t.k && resize!(indices, t.k)
     return indices, dists[indices]
 end
 
 
-function bruteforcesearch(data, metric, query, t::WithinRange, skip=alwaysfalse)
+function bruteforcesearch(data, metric, query, t::WithinRange, skip=nothing)
     indices = Int[]
     dists = metricreturntype(metric, first(data))[]
     for (i, datum) in enumerate(data)
-        skip(i) && continue
+        !isnothing(skip) && skip(i) && continue
         d = metric(query, datum)
         if d <= t.r
             push!(indices, i)
