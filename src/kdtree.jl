@@ -50,24 +50,24 @@ end
 ###########################################################################################
 # Bulk and skip predicates
 ###########################################################################################
-# no easy skip for knn bulk search
 function Neighborhood.bulksearch(tree::KDTree, queries, t::NeighborNumber; sortds=true)
     return NearestNeighbors.knn(tree, queries, t.k, sortds)
 end
 
+# no easy skip version for knn bulk search
 function Neighborhood.bulksearch(tree::KDTree, queries, t::NeighborNumber, skip; sortds=true)
     k, N = t.k, length(queries)
     dists = [Vector{eltype(queries[1])}(undef, k) for _ in 1:N]
     idxs = [Vector{Int}(undef, k) for _ in 1:N]
     for j in 1:N
-        # The skip predicate also skips the point itself for w ≥ 0
+        # Notice that this `_skip` definition matches our API definition!
         _skip = i -> skip(i, j)
         @inbounds NearestNeighbors.knn_point!(tree, queries[j], sortds, dists[j], idxs[j], _skip)
     end
     return idxs, dists
 end
 
-# but there is an easy skip for inrange bulk isearch
+# but there is an easy skip version for inrange bulk isearch!
 function Neighborhood.bulkisearch(tree::KDTree, queries, t::WithinRange, skip=alwaysfalse)
     vec_of_idxs = NearestNeighbors.inrange(tree, queries, t.r)
     skip ≠ alwaysfalse && vecskipfilter!(vec_of_idxs, skip)
