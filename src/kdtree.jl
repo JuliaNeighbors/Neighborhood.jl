@@ -43,7 +43,7 @@ end
 # Performance method when distances are not required (can't sort then)
 function Neighborhood.isearch(tree::KDTree, query, t::WithinRange, skip=alwaysfalse)
     idxs = NearestNeighbors.inrange(tree, query, t.r)
-    skip ≠ alwaysfalse && filter!(skip, idxs)
+    skip ≠ alwaysfalse && filter!(!skip, idxs)
     return idxs
 end
 

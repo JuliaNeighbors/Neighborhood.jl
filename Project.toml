@@ -2,7 +2,7 @@ name = "Neighborhood"
 uuid = "645ca80c-8b79-4109-87ea-e1f58159d116"
 authors = ["Datseris <datseris.george@gmail.com>"]
 repo = "https://github.com/JuliaNeighbors/Neighborhood.jl.git"
-version = "0.2.1"
+version = "0.2.2"
 
 [deps]
 Distances = "b4f34e82-e78d-54a5-968a-f98e89d6e8f7"
