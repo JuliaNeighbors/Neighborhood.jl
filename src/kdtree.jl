@@ -41,8 +41,8 @@ function _NN_get_ds(tree::KDTree, query, idxs)
 end
 
 # Performance method when distances are not required (can't sort then)
-function Neighborhood.isearch(tree::KDTree, query, t::WithinRange, skip=alwaysfalse)
-    idxs = NearestNeighbors.inrange(tree, query, t.r)
+function Neighborhood.isearch(tree::KDTree, query, t::WithinRange, skip=alwaysfalse; sortds=false)
+    idxs = NearestNeighbors.inrange(tree, query, t.r, sortds)
     skip ≠ alwaysfalse && filter!(!skip, idxs)
     return idxs
 end
