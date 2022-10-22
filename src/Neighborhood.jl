@@ -1,8 +1,6 @@
 module Neighborhood
 using Distances
-using NearestNeighbors: inrangecount
 export Euclidean, Chebyshev, Cityblock, Minkowski
-export inrangecount
 
 include("util.jl")
 include("api.jl")
