@@ -1,11 +1,12 @@
 "`alwaysfalse(ags...; kwargs...) = false`"
 alwaysfalse(ags...; kwargs...) = false
 
-export WithinRange, NeighborNumber, SearchType
+import NearestNeighbors: inrangecount
+
+export WithinRange, WithinRangeCount, NeighborNumber, SearchType
 export searchstructure
 export search, isearch, inrange, knn, inrangecount
 export bulksearch, bulkisearch
-import NearestNeighbors
 
 """
 Supertype of all possible search types of the Neighborhood.jl common API.
@@ -99,7 +100,7 @@ inrange(a, b, r, args...; kwargs...) = search(a, b, WithinRange(r), args...; kwa
 
 [`search`](@ref) for `WithinRangeCount(r)` search type.
 """
-inrangecount(tree, point, r) = search(tree, point, r; kwargs...)
+inrangecount(a, b, r; kwargs...) = search(a, b, r; kwargs...)
 
 """
     knn(ss, query, k::Int [, skip]; kwargs...)
