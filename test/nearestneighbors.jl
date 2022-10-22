@@ -88,15 +88,15 @@ end
     max_ds = maximum.(ds)
     tree = KDTree(x, Euclidean())
     # Slightly extend bounds to check for both none and all neighbors.
-    rmins = [WithinRangeCount(min_ds[i] * 0.99) for (i, xᵢ) in enumerate(x)]
-    rmaxs = [WithinRangeCount(max_ds[i] * 1.01) for (i, xᵢ) in enumerate(x)]
+    rmins = [(min_ds[i] * 0.99) for (i, xᵢ) in enumerate(x)]
+    rmaxs = [(max_ds[i] * 1.01) for (i, xᵢ) in enumerate(x)]
     ns_min = [inrangecount(tree, xᵢ, rmins[i]) - 1 for (i, xᵢ) in enumerate(x)]
     ns_max = [inrangecount(tree, xᵢ, rmaxs[i]) - 1 for (i, xᵢ) in enumerate(x)]
     @test all(ns_min .== 0)
     @test all(ns_max .== N - 1)
 
     # For each point, there should be exactly three neighbors within these radii
-    r3s = [WithinRangeCount(ds[i][3] * 1.01) for (i, xᵢ) in enumerate(x)]
+    r3s = [(ds[i][3] * 1.01) for (i, xᵢ) in enumerate(x)]
     ns_3s = [inrangecount(tree, xᵢ, r3s[i]) - 1 for (i, xᵢ) in enumerate(x)]
     @test all(ns_3s .== 3)
 end

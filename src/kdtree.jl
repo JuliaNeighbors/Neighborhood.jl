@@ -29,8 +29,8 @@ function Neighborhood.search(tree::KDTree, query, t::WithinRange, skip=alwaysfal
     return idxs, ds
 end
 
-function Neighborhood.search(tree::KDTree, query, t::WithinRangeCount)
-    return NearestNeighbors.inrangecount(tree, query, t.r)
+function Neighborhood.inrangecount(tree::KDTree, query, r::Real)
+    return NearestNeighbors.inrangecount(tree, query, r)
 end
 
 function _NN_get_ds(tree::KDTree, query, idxs)
