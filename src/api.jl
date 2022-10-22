@@ -1,8 +1,6 @@
 "`alwaysfalse(ags...; kwargs...) = false`"
 alwaysfalse(ags...; kwargs...) = false
 
-import NearestNeighbors: inrangecount
-
 export WithinRange, NeighborNumber, SearchType
 export searchstructure
 export search, isearch, inrange, knn, inrangecount
