@@ -33,6 +33,13 @@ Search type representing all neighbors with distance `≤ r` from the query
 struct WithinRange{R} <: SearchType; r::R; end
 
 """
+    WithinRangeCount(r::Real) <: SearchType
+Search type representing the number of neighbors with distance `≤ r` from the query
+(according to the search structure's metric).
+"""
+struct WithinRangeCount{R} <: SearchType; r::R; end
+
+"""
     NeighborNumber(k::Int) <: SearchType
 Search type representing the `k` nearest neighbors of the query (or approximate
 neighbors, depending on the search structure).
@@ -88,11 +95,11 @@ isearch(args...; kwargs...) = search(args...; kwargs...)[1]
 inrange(a, b, r, args...; kwargs...) = search(a, b, WithinRange(r), args...; kwargs...)
 
 """
-    inrangecount(tree, point, r)
+    inrangecount(ss, query, r; kwargs....)
 
-Count how many points in a pre-computed `tree` lie within radius `r` of `point`.
+[`search`](@ref) for `WithinRangeCount(r)` search type.
 """
-inrangecount(tree, point, r) = NearestNeighbors.inrangecount(tree, point, r)
+inrangecount(tree, point, r) = search(tree, point, r; kwargs...)
 
 """
     knn(ss, query, k::Int [, skip]; kwargs...)
