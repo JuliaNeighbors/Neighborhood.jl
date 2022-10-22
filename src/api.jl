@@ -3,7 +3,7 @@ alwaysfalse(ags...; kwargs...) = false
 
 export WithinRange, NeighborNumber, SearchType
 export searchstructure
-export search, isearch, inrange, knn
+export search, isearch, inrange, knn, inrangecount
 export bulksearch, bulkisearch
 
 """
@@ -57,8 +57,12 @@ function getmetric end
 """
     search(ss, query, t::SearchType [, skip]; kwargs... ) → idxs, ds
 Perform a neighbor search in the search structure `ss` for the given
-`query` with search type `t` (see [`SearchType`](@ref)). Return the indices of the neighbors (in the original data)
-and the distances from the query.
+`query` with search type `t` (see [`SearchType`](@ref)).
+Return the indices of the neighbors (in the original data)
+and the distances from the query. Available search types are:
+
+- [`NeighborNumber`](@ref)
+- [`WithinRange`](@ref)
 
 Optional `skip` function takes as input the index of the found neighbor
 (in the original data) `skip(i)` and returns `true` if this neighbor should be skipped.
@@ -85,6 +89,19 @@ isearch(args...; kwargs...) = search(args...; kwargs...)[1]
 [`search`](@ref) for `WithinRange(r)` search type.
 """
 inrange(a, b, r, args...; kwargs...) = search(a, b, WithinRange(r), args...; kwargs...)
+
+"""
+    inrangecount(ss, query, r::Real; kwargs....) → n::Int
+
+Count the amount of points `n` in the search structure `ss` that are witnin range `r`
+of the `query`. Typically provided that performs better than just getting the
+`length` of [`search`](@ref) with `WithinRange(r)`.
+"""
+function inrangecount(a, b, r; kwargs...)
+    idxs = isearch(a, b, WithinRange(r); kwargs...)
+    return length(idxs)
+end
+
 
 """
     knn(ss, query, k::Int [, skip]; kwargs...)

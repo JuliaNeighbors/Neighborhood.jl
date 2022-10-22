@@ -2,7 +2,6 @@ using Test, Neighborhood, StaticArrays, Random, Distances
 using Neighborhood: datatype, getmetric, bruteforcesearch
 using Neighborhood.Testing
 
-
 Random.seed!(54525)
 data = [rand(SVector{3}) for i in 1:1000]
 query = SVector(0.99, 0.99, 0.99)
@@ -17,8 +16,9 @@ theiler2 = Theiler(2, nidxs)
 r = 0.1
 k = 5
 
-
-@testset "Utils" begin include("util.jl") end
-@testset "Neighborhood.Testing" begin include("Testing.jl") end
-@testset "Brute force" begin include("bruteforce.jl") end
-include("nearestneighbors.jl")
+@testset "Neighborhood" begin
+    @testset "Utils" begin include("util.jl") end
+    @testset "Neighborhood.Testing" begin include("Testing.jl") end
+    @testset "Brute force" begin include("bruteforce.jl") end
+    @testset "NearestNeighbors" begin include("nearestneighbors.jl") end
+end

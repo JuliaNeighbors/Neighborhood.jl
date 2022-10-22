@@ -1,3 +1,5 @@
+using Distances
+
 @testset "KDTree" begin
 
 tree1 = searchstructure(KDTree, data, Euclidean(); reorder = true)
@@ -75,6 +77,28 @@ vec_of_idxs, vec_of_ds = bulksearch(tree1, queries, WithinRange(0.002), theiler2
 for (x, y) in zip(vec_of_idxs, vec_of_ds)
     @test isempty(x)
     @test isempty(y)
+end
+
+@testset "inrangecount" begin
+    N = 10
+    x = [rand(SVector{3}) for i = 1:N]
+    D = pairwise(Euclidean(), x)
+    ds = [sort(D[setdiff(1:N, i), i]) for i = 1:N]
+    min_ds = minimum.(ds)
+    max_ds = maximum.(ds)
+    tree = KDTree(x, Euclidean())
+    # Slightly extend bounds to check for both none and all neighbors.
+    rmins = [(min_ds[i] * 0.99) for (i, xᵢ) in enumerate(x)]
+    rmaxs = [(max_ds[i] * 1.01) for (i, xᵢ) in enumerate(x)]
+    ns_min = [inrangecount(tree, xᵢ, rmins[i]) - 1 for (i, xᵢ) in enumerate(x)]
+    ns_max = [inrangecount(tree, xᵢ, rmaxs[i]) - 1 for (i, xᵢ) in enumerate(x)]
+    @test all(ns_min .== 0)
+    @test all(ns_max .== N - 1)
+
+    # For each point, there should be exactly three neighbors within these radii
+    r3s = [(ds[i][3] * 1.01) for (i, xᵢ) in enumerate(x)]
+    ns_3s = [inrangecount(tree, xᵢ, r3s[i]) - 1 for (i, xᵢ) in enumerate(x)]
+    @test all(ns_3s .== 3)
 end
 
 end

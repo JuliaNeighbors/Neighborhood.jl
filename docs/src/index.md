@@ -26,6 +26,7 @@ Neighborhood.getmetric
 search
 isearch
 inrange
+inrangecount
 knn
 ```
 
