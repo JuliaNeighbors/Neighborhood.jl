@@ -34,6 +34,7 @@ knn
 ```@docs
 SearchType
 WithinRange
+WithinRangeCount
 NeighborNumber
 ```
 
