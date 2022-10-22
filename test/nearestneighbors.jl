@@ -89,7 +89,7 @@ end
     tree = KDTree(x, Euclidean())
     # Slightly extend bounds to check for both none and all neighbors.
     rmins = [WithinRangeCount(min_ds[i] * 0.99) for (i, xᵢ) in enumerate(x)]
-    rmaxs = [WithinRangeCount(max_ds[i] * 1.01) for (i, xᵢ) in enumerate(x)
+    rmaxs = [WithinRangeCount(max_ds[i] * 1.01) for (i, xᵢ) in enumerate(x)]
     ns_min = [inrangecount(tree, xᵢ, rmins[i]) - 1 for (i, xᵢ) in enumerate(x)]
     ns_max = [inrangecount(tree, xᵢ, rmaxs[i]) - 1 for (i, xᵢ) in enumerate(x)]
     @test all(ns_min .== 0)
