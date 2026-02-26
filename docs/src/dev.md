@@ -46,7 +46,7 @@ and returns `true` if this neighbor should be skipped.
 In the second version, `skip` takes two arguments `skip(i, j)` where now `j` is simply
 the index of the query that we are currently searching for.
 
-You can kill two birds with one stone and directly implement one method:
+You can solve two goals at once and directly implement one method:
 ```julia
 search(ss::S, query, t::SearchType, skip = alwaysfalse; kwargs...)
 ```
